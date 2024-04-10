@@ -28,6 +28,16 @@
         app:layout_constraintStart_toStartOf="@+id/guideline1"
         app:layout_constraintTop_toBottomOf="@+id/tv_location_title" />
 
+    <TextView
+        android:id="@+id/tv_check_time_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/measured_at"
+        app:layout_constraintTop_toBottomOf="@+id/img_bg"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp" />
+
     <ImageView
         android:layout_width="100dp"
         android:layout_height="wrap_content"
@@ -62,6 +72,41 @@
         app:layout_constraintBottom_toBottomOf="@+id/img_bg"
         app:layout_constraintStart_toStartOf="@+id/img_bg"
         app:layout_constraintEnd_toEndOf="@+id/img_bg" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:letterSpacing="-0.05"
+        android:textColor="@color/text_light_gray"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="@+id/img_bg"
+        app:layout_constraintStart_toStartOf="@+id/img_bg"
+        app:layout_constraintTop_toBottomOf="@+id/img_bg"
+        android:text="보통" />
+
+    <TextView
+        android:id="@+id/tv_check_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2021-08-29 13:00"
+        android:letterSpacing="-0.05"
+        android:textColor="@color/text_light_gray"
+        android:textSize="13sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_check_time_title" />
+
+    <ImageView
+        android:id="@+id/btn_refresh"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/icon_refresh"
+        app:layout_constraintTop_toBottomOf="@id/tv_check_time"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:padding="5dp" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"
