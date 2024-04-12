@@ -1,11 +1,14 @@
 package com.example.airquality
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
@@ -16,10 +19,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.airquality.databinding.ActivityMainBinding
+import java.io.IOException
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
     lateinit var binding: ActivityMainBinding
+    lateinit var locationProvider : LocationProvider
 
     private val PERMISSIONS_REQUEST_CODE = 100
 
@@ -36,6 +42,53 @@ class MainActivity : ComponentActivity() {
         setContentView(binding.root)
 
         checkAllPermissions()
+        updateUI()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateUI() {
+        locationProvider = LocationProvider(this@MainActivity)
+
+        val latitude: Double = locationProvider.getLocationLatitude()
+        val longitude: Double = locationProvider.getLocationLongitude()
+
+        if (latitude != 0.0 || longitude != 0.0) {
+            // 1. 현재 위치 가져오고 UI 업데이트
+            val address = getCurrentAddress(latitude, longitude)
+            address?.let {
+                binding.tvLocationTitle.text = it.thoroughfare
+                binding.tvLocationSubtitle.text = it.countryName + " " + it.adminArea
+            }
+
+            // 2. 미세먼지 농도 가져오고 UI 업데이트
+        }else {
+            Toast.makeText(this, "위도, 경도 정보를 가져올 수 없습니다.", Toast.LENGTH_LONG).show()
+        }
+
+    }
+
+    private fun getCurrentAddress (latitude : Double, longitude : Double) : Address? {
+        val geocoder = Geocoder(this, Locale.KOREA)
+
+        // 주소를 가져올 때 다중정보가 유입되기 때문에 List로 받아줘야한다.
+        val addresses : List<Address>
+
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 7)!!
+        }catch (ioException : IOException){
+            Toast.makeText(this, "지오코더 서비스 이용불가 상태입니다.", Toast.LENGTH_LONG).show()
+            return null
+        }catch (illegalArgumentException : java.lang.IllegalArgumentException) {
+            Toast.makeText(this, "잘못된 위도, 경도입니다.", Toast.LENGTH_LONG).show()
+            return null
+        }
+
+        if(addresses == null || addresses.isEmpty()) {
+            Toast.makeText(this, "주소가 발견되지 않았습니다.", Toast.LENGTH_LONG).show()
+            return null
+        }
+
+        return addresses[0]
     }
 
     private fun checkAllPermissions() {
@@ -84,6 +137,7 @@ class MainActivity : ComponentActivity() {
 
             if (checkResult) {
                 // 위치값을 가져올 수 있음
+                updateUI()
             } else {
                 Toast.makeText(this@MainActivity, "허용이 거부되었습니다. 앱을 다시 실행하여 권한을 허용해주세요.", Toast.LENGTH_LONG).show()
                 finish()
