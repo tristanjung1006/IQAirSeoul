@@ -10,16 +10,29 @@ import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.updateTransition
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.airquality.databinding.ActivityMainBinding
+import com.example.airquality.retrofit.AirQualityResponse
+import com.example.airquality.retrofit.AirQualityService
+import com.example.airquality.retrofit.RetrofitConnection
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.create
 import java.io.IOException
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
@@ -43,6 +56,7 @@ class MainActivity : ComponentActivity() {
 
         checkAllPermissions()
         updateUI()
+        setRefreshButton()
     }
 
     @SuppressLint("SetTextI18n")
@@ -61,10 +75,87 @@ class MainActivity : ComponentActivity() {
             }
 
             // 2. 미세먼지 농도 가져오고 UI 업데이트
+
+            getAirQualityData(latitude, longitude)
         }else {
             Toast.makeText(this, "위도, 경도 정보를 가져올 수 없습니다.", Toast.LENGTH_LONG).show()
         }
 
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun updateAirUI(airQualityData: AirQualityResponse) {
+
+        val pollutionData = airQualityData.data.current.pollution
+
+        // 수치를 지정한다
+        binding.tvCount.text = pollutionData.aqius.toString()
+
+        // 측정된 날짜
+        val dataTime = ZonedDateTime.parse(pollutionData.ts).withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
+        binding.tvCheckTime.text = dataTime.format(dateFormatter).toString()
+
+        when(pollutionData.aqius) {
+            in 0..50 -> {
+                binding.tvTitle.text = "좋음"
+                binding.imgBg.setImageResource(R.drawable.bg_good)
+            }
+
+            in 51..150 -> {
+                binding.tvTitle.text = "보통"
+                binding.imgBg.setImageResource(R.drawable.bg_soso)
+            }
+
+            in 151..200 -> {
+                binding.tvTitle.text = "나쁨"
+                binding.imgBg.setImageResource(R.drawable.bg_bad)
+            }
+
+            else -> {
+                binding.tvTitle.text = "매우 나쁨"
+                binding.imgBg.setImageResource(R.drawable.bg_worst)
+            }
+        }
+    }
+
+    private fun getAirQualityData(latitude: Double, longitude: Double) {
+        val retrofitAPI = RetrofitConnection.getInstance().create(
+            AirQualityService::class.java
+        )
+
+        retrofitAPI.getAirQualityData(
+            latitude.toString(),
+            longitude.toString(),
+            ""
+        ).enqueue( object : Callback<AirQualityResponse> {
+                @RequiresApi(Build.VERSION_CODES.O)
+                override fun onResponse(
+                    call: Call<AirQualityResponse>,
+                    response: Response<AirQualityResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@MainActivity, "최신 데이터를 업데이트했습니다.", Toast.LENGTH_LONG).show()
+                        response.body()?.let { updateAirUI(it) }
+                    }else {
+                        Toast.makeText(this@MainActivity, "데이터를 로드하는데 실패했습니다.", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<AirQualityResponse>, t: Throwable) {
+                    TODO("Not yet implemented")
+                    t.printStackTrace()
+                    Toast.makeText(this@MainActivity, "데이터를 로드하는데 실패했습니다.", Toast.LENGTH_LONG).show()
+                }
+            }
+        )
+    }
+
+    private fun setRefreshButton() {
+        binding.btnRefresh.setOnClickListener {
+            updateUI()
+        }
     }
 
     private fun getCurrentAddress (latitude : Double, longitude : Double) : Address? {
