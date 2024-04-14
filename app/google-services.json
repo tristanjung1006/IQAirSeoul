@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "52866754715",
+    "project_id": "airquality-f06ea",
+    "storage_bucket": "airquality-f06ea.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52866754715:android:2bf176f938e3adb7243e3e",
+        "android_client_info": {
+          "package_name": "com.example.airquality"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcbck2gAWo15pt6JPLnIfZ8e4via6wjSM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
