@@ -13,6 +13,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -25,6 +26,14 @@ import com.example.airquality.databinding.ActivityMainBinding
 import com.example.airquality.retrofit.AirQualityResponse
 import com.example.airquality.retrofit.AirQualityService
 import com.example.airquality.retrofit.RetrofitConnection
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -49,6 +58,8 @@ class MainActivity : ComponentActivity() {
 
     lateinit var getGPSPermissionLauncher : ActivityResultLauncher<Intent>
 
+    var mInterstitialAd : InterstitialAd? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -57,6 +68,66 @@ class MainActivity : ComponentActivity() {
         checkAllPermissions()
         updateUI()
         setRefreshButton()
+
+        setBannerAds()
+    }
+
+    private fun setInterstitialAds() {
+        val adRequest = AdRequest.Builder().build()
+
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest, object : InterstitialAdLoadCallback() {
+            override fun onAdLoaded(p0: InterstitialAd) {
+                super.onAdLoaded(p0)
+
+                Log.d("Ads Log", "전면 광고 로드에 성공했습니다.")
+                mInterstitialAd = p0
+            }
+
+            override fun onAdFailedToLoad(p0: LoadAdError) {
+                super.onAdFailedToLoad(p0)
+            }
+        })
+    }
+
+    private fun setBannerAds() {
+        MobileAds.initialize(this)
+        val adRequest = AdRequest.Builder().build()
+        binding.adsBanner.loadAd(adRequest)
+
+        binding.adsBanner.adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                super.onAdLoaded()
+                Log.d("Ads Log", "배너 광고가 로드되었습니다.")
+            }
+
+            override fun onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+                Log.d("Ads Log", "배너 광고가 클릭되었습니다.")
+            }
+
+            override fun onAdClosed() {
+                // Code to be executed when the user is about to return
+                // to the app after tapping on an ad.
+                Log.d("Ads Log", "앱으로 되돌아왔습니다.")
+            }
+
+            override fun onAdFailedToLoad(adError : LoadAdError) {
+                // Code to be executed when an ad request fails.
+                Log.d("Ads Log", "배너 광고를 로드하는데 실패했습니다.")
+            }
+
+            override fun onAdImpression() {
+                // Code to be executed when an impression is recorded
+                // for an ad.
+                Log.d("Ads Log", "광고의 노출이 기록되었습니다.")
+            }
+
+            override fun onAdOpened() {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+                Log.d("Ads Log", "광고 화면이 오버레이되었습니다.")
+            }
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -128,7 +199,7 @@ class MainActivity : ComponentActivity() {
         retrofitAPI.getAirQualityData(
             latitude.toString(),
             longitude.toString(),
-            ""
+            "0b0bfd96-681b-4bcd-bdea-fce9cbdd9dd8"
         ).enqueue( object : Callback<AirQualityResponse> {
                 @RequiresApi(Build.VERSION_CODES.O)
                 override fun onResponse(
