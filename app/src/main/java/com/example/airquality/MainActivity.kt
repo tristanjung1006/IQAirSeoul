@@ -15,13 +15,12 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.updateTransition
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.airquality.databinding.ActivityMainBinding
@@ -30,8 +29,6 @@ import com.example.airquality.retrofit.AirQualityService
 import com.example.airquality.retrofit.RetrofitConnection
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -39,14 +36,13 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.create
 import java.io.IOException
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityMainBinding
     lateinit var locationProvider : LocationProvider
@@ -67,7 +63,7 @@ class MainActivity : ComponentActivity() {
 
     val startMapActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
         ActivityResultCallback<ActivityResult> { result ->
-            if ((result.resultCode ?: 0) == Activity.RESULT_OK) {
+            if ((result.resultCode?: 0) == Activity.RESULT_OK) {
                 latitude = result.data?.getDoubleExtra("latitude", 0.0) ?: 0.0
                 longitude = result.data?.getDoubleExtra("longitude", 0.0) ?: 0.0
                 updateUI()
@@ -251,7 +247,7 @@ class MainActivity : ComponentActivity() {
         binding.fab.setOnClickListener {
             val intent = Intent(this, MapActivity::class.java)
             intent.putExtra("currentLat", latitude)
-            intent.putExtra("currentLon", latitude)
+            intent.putExtra("currentLng", latitude)
             startMapActivityResult.launch(intent)
         }
     }
