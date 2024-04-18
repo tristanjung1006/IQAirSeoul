@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">airquality</string>
-    
+
     <string name="measured_at">측정시간</string>
+    <string name="fab">fab</string>
+
+    <string name="map_button_here">여기 미세먼지 농도 측정</string>
 </resources>
