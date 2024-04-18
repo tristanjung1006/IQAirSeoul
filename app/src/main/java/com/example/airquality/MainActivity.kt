@@ -16,6 +16,8 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -51,6 +53,9 @@ class MainActivity : ComponentActivity() {
 
     private val PERMISSIONS_REQUEST_CODE = 100
 
+    var latitude : Double? = 0.0
+    var longitude : Double? = 0.0
+
     val REQUIRED_PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
@@ -60,6 +65,16 @@ class MainActivity : ComponentActivity() {
 
     var mInterstitialAd : InterstitialAd? = null
 
+    val startMapActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
+        ActivityResultCallback<ActivityResult> { result ->
+            if ((result.resultCode ?: 0) == Activity.RESULT_OK) {
+                latitude = result.data?.getDoubleExtra("latitude", 0.0) ?: 0.0
+                longitude = result.data?.getDoubleExtra("longitude", 0.0) ?: 0.0
+                updateUI()
+            }
+        }
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -68,6 +83,8 @@ class MainActivity : ComponentActivity() {
         checkAllPermissions()
         updateUI()
         setRefreshButton()
+
+        setFab()
 
         setBannerAds()
     }
@@ -134,24 +151,25 @@ class MainActivity : ComponentActivity() {
     private fun updateUI() {
         locationProvider = LocationProvider(this@MainActivity)
 
-        val latitude: Double = locationProvider.getLocationLatitude()
-        val longitude: Double = locationProvider.getLocationLongitude()
+        if (latitude == 0.0 && longitude == 0.0) {
+            latitude = locationProvider.getLocationLatitude()
+            longitude = locationProvider.getLocationLongitude()
+        }
 
-        if (latitude != 0.0 || longitude != 0.0) {
+        if (latitude != null || longitude != null) {
             // 1. 현재 위치 가져오고 UI 업데이트
-            val address = getCurrentAddress(latitude, longitude)
+            val address = getCurrentAddress(latitude!!, longitude!!)  // null이 아니라고 위에서 선언했기 때문에 non-null asserted call인 !!를 붙인다.
+
             address?.let {
                 binding.tvLocationTitle.text = it.thoroughfare
                 binding.tvLocationSubtitle.text = it.countryName + " " + it.adminArea
             }
 
             // 2. 미세먼지 농도 가져오고 UI 업데이트
-
-            getAirQualityData(latitude, longitude)
+            getAirQualityData(latitude!!, longitude!!)
         }else {
             Toast.makeText(this, "위도, 경도 정보를 가져올 수 없습니다.", Toast.LENGTH_LONG).show()
         }
-
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -226,6 +244,15 @@ class MainActivity : ComponentActivity() {
     private fun setRefreshButton() {
         binding.btnRefresh.setOnClickListener {
             updateUI()
+        }
+    }
+
+    private fun setFab() {
+        binding.fab.setOnClickListener {
+            val intent = Intent(this, MapActivity::class.java)
+            intent.putExtra("currentLat", latitude)
+            intent.putExtra("currentLon", latitude)
+            startMapActivityResult.launch(intent)
         }
     }
 
