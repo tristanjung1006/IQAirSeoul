@@ -17,7 +17,7 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_current_location"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         app:layout_constraintBottom_toTopOf="@id/btn_check_here"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="20dp"
@@ -25,7 +25,7 @@
         android:backgroundTint="@color/white"
         android:src="@drawable/icon_location"
         app:borderWidth="0dp"
-        />
+        android:contentDescription="@string/fab" />
 
     <LinearLayout
         android:id="@+id/btn_check_here"
@@ -41,7 +41,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:src="@drawable/icon_search"
-            />
+            android:contentDescription="@string/fab" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
