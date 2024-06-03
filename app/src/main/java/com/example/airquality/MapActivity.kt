@@ -14,11 +14,11 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    lateinit var binding : ActivityMapBinding
+    lateinit var binding: ActivityMapBinding
 
-    private var mMap : GoogleMap? = null
-    var currentLat : Double = 0.0
-    var currentLng : Double = 0.0
+    private var mMap: GoogleMap? = null
+    var currentLat: Double = 0.0
+    var currentLng: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +45,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
+        // 현재 위치를 갱신할 때 현재 위치를 지도화면의 정중앙에 위치하도록 한다.
         binding.fabCurrentLocation.setOnClickListener {
             val locationProvider = LocationProvider(this@MapActivity)
             val latitude = locationProvider.getLocationLatitude()
@@ -55,6 +56,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // onMapReadyCallBack 객체를 연결하고 나서 맵이 준비되었을 때 자동으로 onMapReady 메소드가 호출된다.
     override fun onMapReady(googleMap: GoogleMap) {
 
         mMap = googleMap
@@ -68,6 +70,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // 지도 화면에서 카메라 위치에 맞추어서 마커를 표기해준다.
     private fun setMarker() {
         mMap?.let {
             it.clear()
